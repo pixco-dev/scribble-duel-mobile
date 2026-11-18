@@ -207,9 +207,9 @@ function toCanvas(e){const r=cv.getBoundingClientRect();return[(e.clientX-r.left
 function menuAt(x,y){return MENU.findIndex(m=>Math.abs(x-W/2)<170&&Math.abs(y-m.y)<36);}
 cv.addEventListener('pointerdown',e=>{initAudio();cv.focus();clickReq=true;[clickX,clickY]=toCanvas(e);if(state==='keys'){if(waitSlot){waitSlot=null;return;}const k=keysAt(clickX,clickY);if(k>=0){ki=k;keysActivate(k);}clickReq=false;}});
 cv.addEventListener('pointermove',e=>{const [x,y]=toCanvas(e);if(state==='title'){const k=menuAt(x,y);if(k>=0&&k!==menuSel){menuSel=k;sfx('tick',.3);}}if(state==='keys'&&!waitSlot){const k=keysAt(x,y);if(k>=0&&k!==ki){ki=k;sfx('tick',.3);}}if(state==='mode'){const k=modeAt(x,y);if(k>=0&&k!==modeSel){modeSel=k;sfx('tick',.3);}}});
-const padPrev=[{},{}],padState=[null,null],padLatch=[{},{}];
+var padOff=false;const padPrev=[{},{}],padState=[null,null],padLatch=[{},{}];
 function pollPads(){
-  const pads=(navigator.getGamepads?[...navigator.getGamepads()]:[]).filter(Boolean);
+  let pads=[];if(!padOff){try{pads=(navigator.getGamepads?[...navigator.getGamepads()]:[]).filter(Boolean);}catch(e){padOff=true;}}
   for(let i=0;i<2;i++){
     const p=pads[i];if(!p){padState[i]=null;continue;}
     const b=n=>p.buttons[n]&&p.buttons[n].pressed;const ax=p.axes[0]||0,ay=p.axes[1]||0;
@@ -267,11 +267,11 @@ CHARS.push(
   {id:'twist',name:'꽈백이',body:'n_twist',hand:'Red',baseSkin:11,color:'#9a6a48',spd:1,jump:1,weight:1,cd:3.5,sp:'나선탄'},
   {id:'fire',name:'활활이',body:'n_fire',hand:'Yellow',baseSkin:7,color:'#e0861c',spd:1.02,jump:1,weight:1,cd:2.5,sp:'불꽃'},
   {id:'ice',name:'꽁꽁이',body:'n_ice',hand:'Red',baseSkin:3,color:'#1aa9bb',spd:1,jump:1,weight:1.05,cd:3,sp:'얼음탄'},
-  {id:'bubble',name:'퐁퐁이',body:'n_bubble',hand:'Purple',baseSkin:3,color:'#3aa6dd',spd:1,jump:1.05,weight:.9,cd:4,sp:'비눗방울'}
+  {id:'bubble',name:'퐁퐁이',body:'n_bubble',hand:'Purple',baseSkin:3,color:'#3aa6dd',spd:1,jump:1.05,weight:.9,cd:4.5,sp:'비눗방울'}
 );
-Object.assign(SK1,{spike:'가시 3개를 부채꼴로 발사',star:'높이 솟구치며 위를 쳐올림 (2)',heart:'하트 1칸 회복 (13초마다)',hex:'1.6초 방어막, 탄 반사',cloud:'2.5초 두둥실 떠다니기 (이단 점프)',drop:'물살을 타고 미끄러지며 들이받기 (2)',clock:'가까운 상대의 시간을 3초 동안 느리게',zoom:'3초간 빨라지고 부딪힌 상대를 날림 (1)',twist:'서로 꼬이며 날아가는 나선탄 2발 (1)',bubble:'맞은 상대를 방울에 가둬 띄움. 1.2초 뒤 펑 (1)',fire:'불꽃을 쏨 (1)',ice:'맞으면 0.7초 얼어붙음 (1)',pen:'발 밑이나 앞쪽 위에 발판 3칸을 그림 (5초)',clone:'6초 동안 내 공격을 따라 하는 분신을 세움',rock:'살짝 떠오르며 2.8초간 단단해짐. 넉백 거의 없음, 대미지 -1'});
-Object.assign(SK2,{spike:['가시 덫','밟으면 터지는 덫 설치 (2)',5],star:['섬광','주변 상대를 1초 동안 멈춤',6],heart:['하트 화살','맞으면 잠깐 못 움직임 (1)',6.5],hex:['육각 벽','눈앞에 상자 벽을 세움',5],cloud:['비구름','상대 위로 작은 벼락 2번 (1)',5],drop:['물대포','멀리 밀어내는 물줄기 (1)',3.5],clock:['되감기','2초 전에 있던 자리로 돌아감',6],zoom:['슝 돌파','앞으로 순식간에 지나가며 모두 2 대미지',3.5],twist:['꽈배기 채찍','휘감아서 앞의 상대를 끌어당김 (1)',4],bubble:['거품 방패','2초 동안 공격 한 번을 막아줌',5],fire:['화염 방사','앞으로 불을 뿜어 최대 2번 (1+1), 두 번째에 밀쳐냄',4.5],ice:['얼음 가시','바닥에서 얼음 가시가 줄지어 솟음 (2)',5],pen:['잉크 뿌리기','먹칠 +34, 잠깐 느려짐. 100이면 터짐 (3)',3],clone:['자리 바꾸기','분신과 자리를 바꿈. 분신이 없으면 상대와',5],rock:['바위 굴리기','큰 바위를 굴려 보냄. 벽에 한 번 튕김 (2)',4]});
-Object.assign(ULT,{spike:['별똥별','하늘에서 가시 10개가 쏟아짐'],star:['유성우','터지는 별 6개가 떨어짐'],heart:['사랑의 힘','하트 1칸 회복, 방패, 1초 보호막'],hex:['요새','3.5초 방어막 + 5초간 공격 강화'],cloud:['폭풍','양쪽으로 회오리 2개'],drop:['해일','큰 파도가 상대를 쓸어감 (2)'],clock:['시간 정지','상대를 1.8초 동안 완전히 멈춤'],zoom:['음속 돌파','4초간 초고속, 닿을 때마다 2 대미지'],twist:['나선 폭풍','2.5초 동안 빙글빙글 도는 나선 탄막 (1)'],bubble:['방울 태풍','2.8초 동안 거센 바람이 방울을 싣고 불어옴. 갇히면 멀리 날아감 (2)'],fire:['대폭발','잠깐 모은 뒤 주변을 크게 터뜨림 (3)'],ice:['눈보라','모든 상대 3초 느려짐 (1)'],pen:['먹칠','낙서로 덮어 먹칠 +70, 무기, 방패, 버프를 지움'],clone:['분신 습격','분신 셋이 차례로 덤벼들고 마지막에 크게 날림 (2)'],rock:['대지 분쇄','내려찍기: 가까우면 3, 멀면 2. 바위가 쏟아짐']});
+Object.assign(SK1,{spike:'가시 3개를 부채꼴로 발사',star:'높이 솟구치며 위를 쳐올림 (2)',heart:'하트 1칸 회복 (13초마다)',hex:'1.6초 방어막, 탄 반사',cloud:'2.5초 두둥실 떠다니기 (이단 점프)',drop:'물살을 타고 미끄러지며 들이받기 (2)',clock:'가까운 상대의 시간을 3초 동안 느리게',zoom:'3초간 빨라지고 부딪힌 상대를 날림 (1)',twist:'서로 꼬이며 날아가는 나선탄 2발 (1)',bubble:'맞은 상대를 방울에 가둬 띄움. 1초 뒤 펑 (1)',fire:'불꽃을 쏨 (1)',ice:'맞으면 0.7초 얼어붙음 (1)',pen:'발 밑이나 앞쪽 위에 발판 3칸을 그림 (5초)',clone:'6초 동안 내 공격을 따라 하는 분신을 세움',rock:'살짝 떠오르며 2.8초간 단단해짐. 넉백 거의 없음, 대미지 -1'});
+Object.assign(SK2,{spike:['가시 덫','밟으면 터지는 덫 설치 (2)',5],star:['섬광','주변 상대를 1초 동안 멈춤',6],heart:['하트 화살','맞으면 잠깐 못 움직임 (1)',6.5],hex:['육각 벽','눈앞에 상자 벽을 세움',5],cloud:['비구름','상대 위로 작은 벼락 2번 (1)',5],drop:['물대포','멀리 밀어내는 물줄기 (1)',3.5],clock:['되감기','2초 전에 있던 자리로 돌아감',6],zoom:['슝 돌파','앞으로 순식간에 지나가며 모두 2 대미지',3.5],twist:['꽈배기 채찍','휘감아서 앞의 상대를 끌어당김 (1)',4],bubble:['거품 방패','2초 동안 공격 한 번을 막아줌',5],fire:['화염 방사','앞으로 불을 뿜어 최대 2번 (1+1), 두 번째에 밀쳐냄',4.5],ice:['얼음 가시','바닥에서 얼음 가시가 줄지어 솟음 (2)',4.5],pen:['잉크 뿌리기','먹칠 +34, 잠깐 느려짐. 100이면 터짐 (3)',3],clone:['자리 바꾸기','분신과 자리를 바꿈. 분신이 없으면 상대와',5],rock:['바위 굴리기','큰 바위를 굴려 보냄. 벽에 한 번 튕김 (2)',4]});
+Object.assign(ULT,{spike:['별똥별','하늘에서 가시 10개가 쏟아짐'],star:['유성우','터지는 별 6개가 떨어짐'],heart:['사랑의 힘','하트 1칸 회복, 방패, 1초 보호막'],hex:['요새','3.5초 방어막 + 5초간 공격 강화'],cloud:['폭풍','양쪽으로 회오리 2개'],drop:['해일','큰 파도가 상대를 쓸어감 (2)'],clock:['시간 정지','상대를 1.8초 동안 완전히 멈춤'],zoom:['음속 돌파','4초간 초고속, 닿을 때마다 2 대미지'],twist:['나선 폭풍','2.5초 동안 빙글빙글 도는 나선 탄막 (1)'],bubble:['방울 태풍','2.8초 동안 거센 바람이 방울을 싣고 불어옴. 갇히면 멀리 날아감 (1)'],fire:['대폭발','잠깐 모은 뒤 주변을 크게 터뜨림 (3)'],ice:['눈보라','모든 상대 3초 느려짐 (1)'],pen:['먹칠','낙서로 덮어 먹칠 +70, 무기, 방패, 버프를 지움'],clone:['분신 습격','분신 셋이 차례로 덤벼들고 마지막에 크게 날림 (2)'],rock:['대지 분쇄','내려찍기: 가까우면 3, 멀면 2. 바위가 쏟아짐']});
 CHARS.forEach(c=>{c.d1=SK1[c.id];[c.sp2,c.d2,c.cd2]=SK2[c.id];[c.ult,c.du]=ULT[c.id];});
 const SKINS=[null,['파랑','#3b86e8'],['남색','#4e5fb0'],['하늘','#22c3d6'],['청록','#1fa898'],['민트','#6fd6b0'],['연두','#9bcb3a'],['주황','#f39a2e'],['살구','#f2a98a'],['분홍','#ee6aae'],['자주','#b85cc8'],['갈색','#b07a55'],['회색','#8e949e']];
 function hexRgb(h){return[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}
@@ -1092,7 +1092,7 @@ class Player{
     if(id==='ice'){const hitSet=new Set(),base=this.ground?(surfAt(this.cx,this.y+this.h)||{y:this.y+this.h}):surfDown(this.cx,this.y+this.h);if(!base){this.sp2Cd=.3;sfx('nope',.4);return;}let baseY=base.y,stop=false;
       for(let k=0;k<5;k++)later(.05+k*.08,()=>{if(this.dead||stop)return;const x=this.cx+f*(70+k*62),sf=surfAt(x,baseY,20);if(!sf){stop=true;return;}baseY=sf.y;const gy=sf.y;
         zones.push({type:'icespike',x,gy,t:.55,max:.55,s:1+k*.12,pl:sf.pl,off:sf.off});sfx('tink',.5,1.6-k*.1);for(let j=0;j<5;j++)parts.push({k:'dot',c:j%2?'#ffffff':'#8fe3f0',x:x+(Math.random()-.5)*30,y:gy-6,vx:(Math.random()-.5)*160,vy:-150-Math.random()*200,g:1000,r:3+Math.random()*3,life:.5,max:.5});
-        for(const g2 of foesOf(this))if(!hitSet.has(g2)&&Math.abs(g2.cx-x)<34&&g2.y+g2.h>gy-90&&g2.y<gy){hitSet.add(g2);if(hit(g2,2,f*200,-950,x)){g2.stun=Math.max(g2.stun,.4);g2.iceT=.4;}}});}
+        for(const g2 of foesOf(this))if(!hitSet.has(g2)&&Math.abs(g2.cx-x)<40&&g2.y+g2.h>gy-100&&g2.y<gy){hitSet.add(g2);if(hit(g2,2,f*200,-950,x)){g2.stun=Math.max(g2.stun,.6);g2.iceT=.6;}}});}
     if(id==='bubble'){this.bshT=2;sfx('magic',.6,1.2);}
     if(id==='fire'){zones.push({type:'flame',owner:this,t:.9,max:.9,tick:0,hits:new Map()});sfx('gust',.7,.6);}
     if(id==='twist'){zones.push({type:'whip',x:this.cx,y:this.cy,f,t:.3,max:.3,owner:this});for(const g of foesOf(this))if(overlap(f>0?this.cx:this.cx-170,this.cy-40,170,80,g.x,g.y,g.w,g.h)){hit(g,1,-f*560,-260,this.cx+f*200);}sfx('whirl',.7,1.2);}
@@ -1560,7 +1560,7 @@ function hit(p,dmg,kx,ky,srcX,noShield){
   if(live&&dmg>0&&mode!=='battle'){if(mode==='crown'&&crown&&crown.holder===p)dropCrown(p,false);if(mode==='coin')dropCoins(p,dmg*2,false);}
   if(live&&dmg>0){p.hp=Math.max(0,p.hp-dmg);if(p.enemy){for(const q of players)if(!q.dead)q.ult=Math.min(100,q.ult+dmg*7*(q.ch.ultRate||1));}else{p.ult=Math.min(100,p.ult+dmg*10*(p.ch.ultRate||1));if(mode!=='coop'){const a=players[1-p.i];if(a)a.ult=Math.min(100,a.ult+dmg*16*(a.ch.ultRate||1)*(a.ultGainT>0?.25:1));}}}
   if(kx!==null)p.vx=kx/wt;if(ky!==null)p.vy=ky/Math.sqrt(wt);
-  p.stun=p.armorT>0?0:.22;p.inv=live?.8:.3;p.ground=false;p.jumping=false;p.sq=.8;if(!(p.armorT>0)){p.slam=0;p.dashT=0;}
+  p.stun=p.armorT>0?0:.22;p.inv=live?.7:.3;p.ground=false;p.jumping=false;p.sq=.8;if(!(p.armorT>0)){p.slam=0;p.dashT=0;}
   if(dmg>0){
     fx('hit',p.cx,p.cy,p.color);shake(.18,dmg>1?9:6);hitstop=dmg>2?.11:dmg>1?.085:.06;sfx('hit',.75);
     if(live)popText('-'+dmg,p.cx,p.y-20,p.color,38);
@@ -1719,7 +1719,7 @@ function updateShots(dt){
       if(s.type==='blast')explode(s.x,s.y,s.owner);
       else if(s.type==='pot'){s.boom=true;explode(s.x,s.y,s.owner,135,s.dmg||2);}
       else if(s.type==='hook'){const o=s.owner,d=Math.sign(o.cx-foe.cx||1);if(s.ult){foe.inv=0;hit(foe,0,d*1150,-300,s.x,true);foe.stun=.6;sfx('grab',.9);later(.3,()=>{if(!foe.dead){foe.inv=0;hit(foe,3,o.face*450,-1150,o.cx,true);shake(.3,14);}});}else if(hit(foe,1,d*820,-380,s.x)){foe.stun=.42;sfx('grab',.7);}}
-      else{const d=SHOT[s.type],dmg=s.dmg||d.dmg;const ok=hit(foe,dmg,Math.sign(s.vx||1)*d.kx,d.ky,s.x-s.vx*.05);if(s.type==='bubbleshot'&&!(foe.bubbleT>0)){foe.bubbleT=s.big?1.5:1.2;foe.bubbleDmg=s.big?2:1;foe.bubbleOwner=s.owner;foe.vx=0;foe.vy=-60;sfx('magic',.5,1.6);}
+      else{const d=SHOT[s.type],dmg=s.dmg||d.dmg;const ok=hit(foe,dmg,Math.sign(s.vx||1)*d.kx,d.ky,s.x-s.vx*.05);if(s.type==='bubbleshot'&&!(foe.bubbleT>0)){foe.bubbleT=s.big?1.3:1;foe.bubbleDmg=s.big?2:1;foe.bubbleOwner=s.owner;foe.vx=0;foe.vy=-60;sfx('magic',.5,1.6);}
       if(ok&&s.type==='iceshot'){foe.stun=Math.max(foe.stun,.7);foe.iceT=.7;foe.vx=0;for(let k=0;k<10;k++)parts.push({k:'dot',c:k%2?'#ffffff':'#8fe3f0',x:s.x,y:s.y,vx:(Math.random()-.5)*300,vy:-Math.random()*250,g:900,r:3+Math.random()*3,life:.5,max:.5});sfx('tink',.6,1.4);}
       if(ok&&s.type==='fireball'){for(let k=0;k<10;k++)parts.push({k:'dot',c:k%2?'#ffd23f':'#ff8a3d',x:s.x,y:s.y,vx:(Math.random()-.5)*300,vy:-Math.random()*250,g:500,r:3+Math.random()*4,life:.45,max:.45});}
       if(s.type==='gluebomb'){const g=navAt(foe.cx,foe.y+foe.h-4);if(g)glueSplash(s.owner,foe.cx,g[1]);}
@@ -1925,9 +1925,9 @@ function world(rdt,inp){
     }
     if(z.type==='bubwind'){const o=z.owner,dir=z.dir;z.t-=dt;z.et-=dt;if(o.dead){z.t=0;continue;}
       const pw=Math.min(1,(z.max-z.t)*3,z.t*3);
-      for(const g of foesOf(o))if(!g.dead)g.moveX(dir*(g.bubbleT>0?560:270)*pw*dt);
+      for(const g of foesOf(o))if(!g.dead)g.moveX(dir*(g.bubbleT>0?480:220)*pw*dt);
       for(const q of shots)if(isFoe(o,q.owner)&&q.type!=='mine'){q.vx=approach(q.vx,dir*700,1800*dt);}
-      if(z.et<=0){z.et=.18;const sx=dir>0?-30:W+30;const fs=foesOf(o).filter(g=>!g.dead),tg=fs.length&&Math.random()<.6?fs[Math.random()*fs.length|0]:null;shots.push({type:'bubbleshot',x:sx,y:tg?tg.cy+(Math.random()-.5)*60:120+Math.random()*(H-200),vx:dir*(760+Math.random()*240),vy:0,g:0,r:18,owner:o,life:3,spin:0,wind:true});}
+      if(z.et<=0){z.et=.24;const sx=dir>0?-30:W+30;const fs=foesOf(o).filter(g=>!g.dead),tg=fs.length&&Math.random()<.6?fs[Math.random()*fs.length|0]:null;shots.push({type:'bubbleshot',x:sx,y:tg?tg.cy+(Math.random()-.5)*60:120+Math.random()*(H-200),vx:dir*(760+Math.random()*240),vy:0,g:0,r:18,owner:o,life:3,spin:0,wind:true});}
       if(Math.random()<.35)parts.push({k:'bub',x:dir>0?-10:W+10,y:Math.random()*H,vx:dir*(500+Math.random()*300),vy:(Math.random()-.5)*60,g:0,r:3+Math.random()*7,life:2.2,max:2.2});
       if(Math.random()<.15)sfx('gust',.25,.8+Math.random()*.4);
       continue;}
